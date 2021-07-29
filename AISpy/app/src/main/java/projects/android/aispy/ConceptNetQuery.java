@@ -82,7 +82,15 @@ public class ConceptNetQuery extends AsyncTask<Void, Void, ArrayList<String>> {
                     JSONObject edge = (JSONObject) edges.get(i);
                     JSONObject end = (JSONObject) edge.get("end");
                     String label = (String) end.get("label");
-                    if (!label.contains(target) && !badWordsScreen.contains(label)){
+                    Double weight=(Double)edge.get("weight");
+//                    try{
+//                        weight=(Double)edge.get("weight");
+//                    }
+//                    catch (Exception e){
+//                        weight=0.0;
+//                    }
+                    if (!label.contains(target) && !badWordsScreen.contains(label) && weight>2.0){
+                        label=label.toLowerCase();
                         results.add(label);
                         numResults++;
                     }

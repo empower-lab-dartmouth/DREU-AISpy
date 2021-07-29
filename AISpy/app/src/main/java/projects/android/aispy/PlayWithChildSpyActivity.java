@@ -10,6 +10,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
+
+//import org.python.util.PythonInterpreter;
+//import org.python.core.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,11 +70,22 @@ public class PlayWithChildSpyActivity extends ConversationActivity {
         commonRelativeLocations.put("below", commonIndicatorsOfBelow);
     }
 
+    private final HashMap <String, String>  commonSenseLabels;{
+        commonSenseLabels = new HashMap<>();
+        commonSenseLabels.put("capable of", "CapableOf");
+        commonSenseLabels.put("used for", "UsedFor");
+        commonSenseLabels.put("has a", "HasA");
+        commonSenseLabels.put("is", "HasProperty");
+
+
+    }
+
     //constants
     private final int NUM_GUESSES_ALLOWED = 5;
     private final int MAX_GUESSES_FOR_ONE_OBJECT = 3;
     private final int COLOR_CLUE = 1;
     private final int LOCATION_CLUE = 2;
+    private final int CONCEPTNET_CLUE=3;
 
     //String constants
     private final String COMPUTER_INIT = "Great, you do the spying";
@@ -88,14 +105,16 @@ public class PlayWithChildSpyActivity extends ConversationActivity {
     private int numGuesses;
     private int numDesperateGuesses;
     private int numGuessesForCurrentObject;
-    private int clueType;
+    private int clueType=CONCEPTNET_CLUE;
     private HashSet<AISpyObject> alreadyGuessedObjects;
     private String[] clueEssentials;
     private boolean desperateMode;
     private boolean hasGivenClue;
     private boolean playAgainRequestInProgress;
     private ArrayList<AISpyObject> objectPool;
+    private String relation;
 
+    private HashMap <String, Integer> guessRank;
     private final int CLUE_INPUT_REQUEST = 11;
     private final int FEEDBACK_INPUT_REQUEST = 12;
     private final int PLAY_AGAIN_REQUEST = 20;
@@ -154,7 +173,17 @@ public class PlayWithChildSpyActivity extends ConversationActivity {
                 return;
             }
         }
+        // Check if it is a ConceptNet Clue
+        for (String commonsense: commonSenseLabels.keySet()){
+            if (iSpyClue.contains(commonsense)){
+                clueType=CONCEPTNET_CLUE;
+                getClueEssentials(commonsense);
+                return;
+            }
+
+        }
     }
+
 
     /**
      * Fills clueEssentials with important clue information. clueEssentials[0] stores the primary information (the color or the relative direction)
@@ -166,6 +195,10 @@ public class PlayWithChildSpyActivity extends ConversationActivity {
         } else if (clueType == LOCATION_CLUE){
             clueEssentials[0] = primary;
             clueEssentials[1] = iSpyClue;
+        }
+        else if (clueType==CONCEPTNET_CLUE){
+            clueEssentials[0]=primary;
+            clueEssentials[1]=iSpyClue;
         }
         else{
             return;
@@ -194,6 +227,11 @@ public class PlayWithChildSpyActivity extends ConversationActivity {
                 case LOCATION_CLUE:
                     computerGuess = findObjectFromLocation();
                     break;
+                case CONCEPTNET_CLUE:
+                    computerGuess=findObjectFromConceptNet();
+                    break;
+
+
             }
 
             if (computerGuess == null){ //If couldn't find a possible object based on the clue, go to desperate mode
@@ -268,6 +306,21 @@ public class PlayWithChildSpyActivity extends ConversationActivity {
             }
         }
         return null;
+    }
+
+    private AISpyObject findObjectFromConceptNet(){
+        String relation=clueEssentials[0];
+        String wholeClue=clueEssentials[1];
+//        String attribute=wholeClue.split("I spy something that is "+ relation + ' ')[0];
+//        PythonInterpreter pi = new PythonInterpreter();
+        Python python= Python.getInstance();
+        String[] split =wholeClue.split("I spy something that is "+ relation + ' ');
+        String attribute=split[1];
+        PyObject pythonFile=python.getModule("computer_guess");
+        PyObject currRank= pythonFile.callAttr("create_Rank", attribute, commonSenseLabels.get(relation), objectPool);
+
+
+     return null;
     }
 
     /****** Public listener Methods ********/
@@ -423,6 +476,7 @@ public class PlayWithChildSpyActivity extends ConversationActivity {
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     String guess = result.get(0).toLowerCase();
                     iSpyClue = guess;
+                    iSpyClue="I spy something that is used for organizing books";
                     startComputerGuessing();
                     hasGivenClue = true;
                 }

@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.Random;
 
 
+
+
 /**
  * In PlayWithComputerSpyActivity, the child guesses the chosen i-spy object based off of clues given by the computer.
  * The child can choose between either color clues or location clues
@@ -316,6 +318,7 @@ public class PlayWithComputerSpyActivity extends ConversationActivity {
             clueTypes.addAll(cluePool.keySet());
             clueType = clueTypes.get(rand.nextInt(cluePool.keySet().size()));
 
+
             switch(clueType){
                 case COLOR_CLUE:
                     iSpyClue = "is " + cluePool.get(COLOR_CLUE).get(0);
@@ -333,6 +336,10 @@ public class PlayWithComputerSpyActivity extends ConversationActivity {
                     i = rand.nextInt(conceptNetClues.size());
                     iSpyClue = conceptNetClues.get(i);
                     conceptNetClues.remove(i);
+                    //child can give a attribute and family can fact check it
+
+                    // stick with python if QA generation only in python
+                    // look for ways to integrate python and java
                     if (conceptNetClues.size() == 0) cluePool.remove(CONCEPTNET_CLUE);
                     break;
             }

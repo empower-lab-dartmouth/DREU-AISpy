@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.chaquo.python'
 
 
 android {
@@ -13,6 +14,27 @@ android {
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+        sourceSets{
+            main{
+                python{
+                    srcDirs=["src/main/python"]
+                }
+            }
+        }
+        python {
+            buildPython "/Users/emmawang/opt/anaconda3/bin/python3\n" +
+                    "/usr/bin/python3"
+            buildPython "python3"
+            pip {
+                // A pip requirement specifier, with or without a version number:
+                install "requests"
+            }
+        }
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

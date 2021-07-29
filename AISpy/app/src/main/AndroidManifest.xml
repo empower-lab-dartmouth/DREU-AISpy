@@ -23,7 +23,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:name="com.chaquo.python.android.PyApplication"
+        >
 
         <!-- Necessary in order to store captured images -->
         <provider
